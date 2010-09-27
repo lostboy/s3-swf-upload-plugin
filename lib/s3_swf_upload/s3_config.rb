@@ -9,22 +9,20 @@ module S3SwfUpload
       begin
         filename = "#{Rails.root}/config/amazon_s3.yml"
         file = File.open(filename)
-        config = YAML.load(file)[Rails.env]
+        config = YAML.load(file)[Rails.env]||{}
 
-        if config == nil
-          raise "Could not load config options for #{Rails.env} from #{filename}."
-        end
+        #if config == nil
+        #  raise "Could not load config options for #{Rails.env} from #{filename}."
+        #end
 
-        @@access_key_id     = config['access_key_id']
-        @@secret_access_key = config['secret_access_key']
-        @@bucket            = config['bucket']
+        @@access_key_id     = config['access_key_id']||ENV["S3_ACCESS_KEY"]
+        @@secret_access_key = config['secret_access_key']||ENV["S3_SECRET_KEY"]
+        @@bucket            = config['bucket']||ENV["S3_UPLOAD_BUCKET"]
         @@max_file_size     = config['max_file_size']
         @@acl               = config['acl'] || 'private'
 
-        
-        
         unless @@access_key_id && @@secret_access_key && @@bucket
-          raise "Please configure your S3 settings in #{filename} before continuing so that S3 SWF Upload can function properly."
+          raise "Please configure your S3 settings so that S3 SWF Upload can function properly."
         end
       rescue Errno::ENOENT
          # No config file yet. Not a big deal. Just issue a warning
